@@ -13,6 +13,8 @@ defmodule Exdrive do
       # worker(Exdrive.Worker, [arg1, arg2, arg3]),
     ]
 
+    spawn(&Exdrive.Distributor.startwork/0)
+
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Exdrive.Supervisor]

@@ -17,7 +17,7 @@ defmodule Exdrive.Mixfile do
   # Type `mix help compile.app` for more information.
   def application do
     [mod: {Exdrive, []},
-     applications: [:phoenix, :cowboy, :logger, :gettext]]
+     applications: [:phoenix, :cowboy, :logger, :gettext, :httpotion]]
   end
 
   # Specifies which paths to compile per environment.
@@ -31,6 +31,7 @@ defmodule Exdrive.Mixfile do
     [{:phoenix, "~> 1.1.5"},
      {:gettext, "~> 0.9"},
      {:cowboy, "~> 1.0"},
+     {:httpotion, "~> 3.0"},
      {:elixir_talk, "~> 1.1"}]
   end
 end
