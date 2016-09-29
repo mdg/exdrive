@@ -11,9 +11,8 @@ defmodule Exdrive do
       supervisor(Exdrive.Endpoint, []),
       # Here you could define other workers and supervisors as children
       # worker(Exdrive.Worker, [arg1, arg2, arg3]),
+      supervisor(Exdrive.Distributor, [:config]),
     ]
-
-    spawn(&Exdrive.Distributor.startwork/0)
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
     # for other strategies and supported options
