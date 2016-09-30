@@ -5,7 +5,7 @@ defmodule Exdrive.Router do
     plug :accepts, ["json"]
   end
 
-  scope "/api", Exdrive do
+  scope "/queue", Exdrive do
     pipe_through :api
 
     post "/publish/:job", PublishController, :publish
