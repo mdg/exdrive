@@ -1,24 +1,27 @@
 defmodule Exdrive.Pipe do
     use GenServer
 
-    def start_link(cfg) do
-        IO.puts("Pipe.start_link")
-        Supervisor.start_link(__MODULE__, [])
+    def start_link(prio) do
+        IO.puts("Pipe.start_link(prio)")
+        {:ok, bspid} = ElixirTalk.connect('localhost', 11300)
+        if prio != "default" do
+            ElixirTalk.ignore(bspid, "default")
+            ElixirTalk.watch(bspid, prio)
+        end
+        GenServer.start_link(__MODULE__, bspid)
     end
 
-    def init(i) do
-        IO.puts("Pipe.init")
-        children = [
-            worker(Exdrive.Worker, [:workfg])
-        ]
-
-        supervise(children, strategy: :one_for_one)
-    end
-
-    def startwork() do
-        {:ok, pid} = ElixirTalk.connect('localhost', 11300)
-        IO.puts("doing work")
+    def handle_cast(:work, pid) do
         dowork(pid)
+        GenServer.cast(self(), :work)
+        {:noreply, pid}
+    end
+    def handle_cast(:quit, state) do
+        {:noreply, state}
+    end
+
+    def terminate(_reason, pid) do
+        ElixirTalk.quit(pid)
     end
 
     def dowork(pid) do
@@ -31,6 +34,5 @@ defmodule Exdrive.Pipe do
         ElixirTalk.delete(pid, job_id)
         dowork(pid)
     end
-
 end
 

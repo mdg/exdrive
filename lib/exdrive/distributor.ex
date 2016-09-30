@@ -1,35 +1,28 @@
 defmodule Exdrive.Distributor do
-    use GenServer
+    use Supervisor
+    # import Supervisor.Spec
 
     def start_link(cfg) do
-        IO.puts("Distributor.start_link")
-        Supervisor.start_link(__MODULE__, [])
+        Supervisor.start_link(__MODULE__, cfg)
     end
 
-    def init(i) do
+    def init(_cfg) do
         IO.puts("Distributor.init")
         children = [
-            worker(Exdrive.Worker, [:workfg])
+            worker(Exdrive.Pipe, [:high], id: 1),
+            worker(Exdrive.Pipe, [:default], id: 2),
+            worker(Exdrive.Pipe, [:low], id: 3),
         ]
 
-        supervise(children, strategy: :one_for_one)
+        IO.puts("Workers: #{inspect children}")
+        ch = supervise(children, strategy: :one_for_one)
+        IO.puts("Supervised Workers: #{inspect ch}")
+        ch
     end
 
-    def startwork() do
-        {:ok, pid} = ElixirTalk.connect('localhost', 11300)
-        IO.puts("doing work")
-        dowork(pid)
+    def handle_cast(:reload, _newcfg) do
+        # close all the old children and restart new ones w/ new config
     end
-
-    def dowork(pid) do
-        {:reserved, job_id, job_data} = ElixirTalk.reserve(pid)
-        IO.puts("job_id: #{job_id}, job_input: #{job_data}")
-        path = "http://localhost:4000/api/work/#{job_data}"
-        IO.puts("send POST -> #{path}")
-        result = HTTPotion.post(path)
-        IO.puts(inspect result)
-        ElixirTalk.delete(pid, job_id)
-        dowork(pid)
+    def handle_cast(:quit, _) do
     end
-
 end
