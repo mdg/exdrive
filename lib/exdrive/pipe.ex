@@ -2,13 +2,21 @@ defmodule Exdrive.Pipe do
     use GenServer
 
     def start_link(prio) do
-        IO.puts("Pipe.start_link(prio)")
+        IO.puts("Pipe.start_link(#{prio})")
         {:ok, bspid} = ElixirTalk.connect('localhost', 11300)
         if prio != "default" do
             ElixirTalk.ignore(bspid, "default")
             ElixirTalk.watch(bspid, prio)
         end
-        GenServer.start_link(__MODULE__, bspid)
+        l = GenServer.start_link(__MODULE__, bspid)
+        IO.puts("Pipe.start_link() = #{inspect l}")
+        l
+    end
+
+    def init(pid) do
+        IO.puts("Pipe.init()")
+        GenServer.cast(self(), :work)
+        {:ok, pid}
     end
 
     def handle_cast(:work, pid) do
@@ -27,7 +35,7 @@ defmodule Exdrive.Pipe do
     def dowork(pid) do
         {:reserved, job_id, job_data} = ElixirTalk.reserve(pid)
         IO.puts("job_id: #{job_id}, job_input: #{job_data}")
-        path = "http://localhost:4000/api/work/#{job_data}"
+        path = "http://localhost:4000/queue/work/#{job_data}"
         IO.puts("send POST -> #{path}")
         result = HTTPotion.post(path)
         IO.puts(inspect result)

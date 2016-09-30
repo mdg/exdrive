@@ -10,8 +10,7 @@ defmodule Exdrive do
       # Start the endpoint when the application starts
       supervisor(Exdrive.Endpoint, []),
       # Here you could define other workers and supervisors as children
-      # worker(Exdrive.Worker, [arg1, arg2, arg3]),
-      supervisor(Exdrive.Distributor, [:config]),
+      worker(Exdrive.Distributor, [:config]),
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html

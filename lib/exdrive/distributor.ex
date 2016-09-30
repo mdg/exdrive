@@ -1,12 +1,13 @@
 defmodule Exdrive.Distributor do
-    use Supervisor
-    # import Supervisor.Spec
+    use GenServer
 
     def start_link(cfg) do
-        Supervisor.start_link(__MODULE__, cfg)
+        GenServer.start_link(__MODULE__, cfg)
     end
 
     def init(_cfg) do
+        import Supervisor.Spec
+
         IO.puts("Distributor.init")
         children = [
             worker(Exdrive.Pipe, [:high], id: 1),
@@ -15,9 +16,12 @@ defmodule Exdrive.Distributor do
         ]
 
         IO.puts("Workers: #{inspect children}")
-        ch = supervise(children, strategy: :one_for_one)
+        opts = [strategy: :one_for_one, name: Exdrive.Distributor.Supervisor]
+        {:ok, ch} = Supervisor.start_link(children, opts)
         IO.puts("Supervised Workers: #{inspect ch}")
-        ch
+        chlist = Supervisor.which_children(ch)
+        IO.puts("which_children: #{inspect chlist}")
+        {:ok, ch}
     end
 
     def handle_cast(:reload, _newcfg) do
