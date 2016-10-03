@@ -13,6 +13,9 @@ defmodule Exdrive do
       worker(Exdrive.Distributor, [:config]),
     ]
 
+    :ets.new(:queue_table, [:public, :named_table])
+    :ets.new(:work_table, [:public, :named_table])
+
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Exdrive.Supervisor]

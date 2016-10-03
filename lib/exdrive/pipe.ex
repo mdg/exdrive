@@ -35,11 +35,18 @@ defmodule Exdrive.Pipe do
     def dowork(pid) do
         {:reserved, job_id, job_data} = ElixirTalk.reserve(pid)
         IO.puts("job_id: #{job_id}, job_input: #{job_data}")
+        new_count = :ets.update_counter(:work_table, job_data, 1,
+            {job_data, 0})
         path = "http://localhost:4000/queue/work/#{job_data}"
         IO.puts("send POST -> #{path}")
         result = HTTPotion.post(path)
         IO.puts(inspect result)
+        :ets.update_counter(:work_table, job_data, -1,
+            {job_data, 0})
         ElixirTalk.delete(pid, job_id)
+        new_count = :ets.update_counter(:queue_table, job_data, -1,
+            {job_data, 0})
+        IO.puts("new_count #{new_count}")
         dowork(pid)
     end
 end

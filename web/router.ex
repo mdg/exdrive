@@ -8,7 +8,8 @@ defmodule Exdrive.Router do
   scope "/queue", Exdrive do
     pipe_through :api
 
-    post "/publish/:job", PublishController, :publish
+    post "/publish/:prio/:job", PublishController, :publish
+    get "/stats", StatsController, :stats
     post "/work/:job", WorkController, :doit
   end
 end
